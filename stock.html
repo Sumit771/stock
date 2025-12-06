@@ -63,6 +63,8 @@
       function addItem() {
         if (!name.trim()) return alert("Enter medicine name");
         if (!boxes.trim()) return alert("Enter boxes");
+         if (Number(boxes) < 0) return alert("Boxes cannot be negative");
+  if (strips && Number(strips) < 0) return alert("Strips cannot be negative");
 
         // If editing, update the item
         if (editIndex !== null) {
