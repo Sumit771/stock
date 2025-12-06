@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Medicine Stock Manager</title>
+
+  <!-- React + Babel -->
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- jsPDF & html2canvas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    function App() {
+     const suggestions = [
+  "Epsinil-2",
+  "Fluoxecare-40",
+  "Fluoxecare-20 MD",
+  "Fulsleep-10",
+  "Fulsleep-5",
+  "Halocare-1.5 DT",
+  "Halocare 5 DT",
+  "Depout-CH",
+  "Depout-10",
+  "Lored-2",
+  "Etuit-60",
+  "Etuit -90",
+  "Etuit-T",
+  "Deploc-30",
+  "Setoxlin Plus",
+  "Setoxlin CR 12.5",
+  "Setoxlin 12.5 Plus",
+  "Alzocept 10",
+  "Alzocept 5M",
+  "Steriocort 6",
+  "Olancare 2.5MD",
+  "Olancare 5MD",
+  "Olancare 20MD",
+  "Olancare 15MD",
+  "Olancare 5F",
+  "Rize-1",
+  "Jovail Plus",
+  "Jovail Lite",
+  "Jovail 15",
+  "Jovail 5",
+  "Jovail 10",
+  "Develpin ER 250",
+  "Develin ER 500",
+  "Oxozep DT 150",
+  "Oxozep DT 300",
+  "Oxozep 600",
+  "Fludil 5T",
+  "Ano Plus",
+  "SV Chrono 300",
+  "SV Chrono 500",
+  "Restnil LS",
+  "Restnil Plus",
+  "Flupen M",
+  "Clomicare 50",
+  "Clomicare 10",
+  "Clomicare 25",
+  "Clidore",
+  "Deples 7.5",
+  "Deples 15",
+  "Epilong 0.25MD",
+  "Epilong 0.5MD",
+  "Epilong 1MD",
+  "D-Ventodep XR-50",
+  "Clozcare 100",
+  "Clozcare 50",
+  "Clozcare 25",
+  "Levizep 250",
+  "Levizep 500",
+  "Brivazep 50",
+  "Neuracle K2-7",
+  "Tablodep DT-50",
+  "Tablodep 25",
+  "Tablodep DT-100",
+  "Depnocept-50",
+  "Depnocept-100",
+  "Thenopam Pro",
+  "Propol C 0.5",
+  "Aripaxe -10",
+  "Aripaxe-5",
+  "Aripaxe-15",
+  "Apropride-100",
+  "Apropride-50",
+  "Sertane 25",
+  "Sertane 50",
+  "Sertane 100",
+  "Dezotal-150",
+  "Rabam-20",
+  "Rabam DSR",
+  "Ripcid LSR",
+  "Closum 5MD",
+  "Closum 10MD",
+  "Tigervit",
+  "Oxocetam-400",
+  "Olacute 5F",
+  "Olcute 7.5",
+  "Olacute 5",
+  "Olacute 2.5",
+  "Pacipan 1",
+  "Pacipan 0.5",
+  "Negride 50"
+];
+
+
+      const [name, setName] = React.useState("");
+      const [boxes, setBoxes] = React.useState("");
+      const [strips, setStrips] = React.useState("");
+      const [showSug, setShowSug] = React.useState(false);
+      const [items, setItems] = React.useState([]);
+
+      function addItem() {
+        if (!name.trim()) return alert("Enter medicine name");
+        if (!boxes.trim()) return alert("Enter boxes");
+
+        setItems([...items, {
+          name,
+          boxes,
+          strips: strips || "-"
+        }]);
+
+        setName("");
+        setBoxes("");
+        setStrips("");
+        setShowSug(false);
+      }
+
+     function generatePDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+
+  doc.setFontSize(18);
+  doc.text("AVAILABLE STOCK", 10, 15);
+
+  const today = new Date().toLocaleDateString();
+  doc.setFontSize(11);
+  doc.text(`Date: ${today}`, 10, 22);
+
+  let y = 35;
+  doc.setFontSize(12);
+
+  // Table Header
+  doc.text("Sr No", 10, y);
+  doc.text("Name", 30, y);
+  doc.text("Boxes", 80, y);
+  doc.text("Strips", 100, y);
+
+  y += 8;
+  doc.setLineWidth(0.2);
+  doc.line(2, y, 200, y);
+
+  y += 8;
+
+  // Table Rows
+  items.forEach((it, index) => {
+    doc.text(String(index + 1), 10, y);  // Sr No
+    doc.text(it.name, 30, y);
+    doc.text(String(it.boxes), 80, y);
+    doc.text(String(it.strips), 100, y);
+
+    y += 8;
+
+    if (y > 270) {
+      doc.addPage();
+      y = 20;
+    }
+  });
+
+  doc.save("available_stock.pdf");
+}
+
+
+      return (
+        <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow">
+          <h1 className="text-2xl font-bold mb-1">AVAILABLE STOCK</h1>
+          <p className="text-gray-600 mb-4">Date: {new Date().toLocaleDateString()}</p>
+
+          <label className="font-semibold">Medicine Name</label>
+          <input
+            className="w-full border p-2 rounded mb-1"
+            value={name}
+            onChange={(e) => { setName(e.target.value); setShowSug(true); }}
+            placeholder="Enter medicine name"
+          />
+
+          {showSug && name && (
+            <div className="border bg-white p-2 rounded max-h-40 overflow-auto mb-3">
+              {suggestions
+                .filter(s => s.toLowerCase().includes(name.toLowerCase()))
+                .map((s, i) => (
+                  <div
+                    key={i}
+                    className="p-1 cursor-pointer hover:bg-gray-200"
+                    onClick={() => { setName(s); setShowSug(false); }}
+                  >
+                    {s}
+                  </div>
+                ))}
+            </div>
+          )}
+
+          <label className="font-semibold">Boxes (Reqd)</label>
+          <input
+            type="number"
+            className="w-full border p-2 rounded mb-3"
+            value={boxes}
+            onChange={(e) => setBoxes(e.target.value)}
+            placeholder="Enter boxes"
+          />
+
+          <label className="font-semibold">Strips (Optional)</label>
+          <input
+            type="number"
+            className="w-full border p-2 rounded mb-3"
+            value={strips}
+            onChange={(e) => setStrips(e.target.value)}
+            placeholder="Enter strips"
+          />
+
+          <button
+            onClick={addItem}
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+          >
+            Add
+          </button>
+
+          {items.length > 0 && (
+            <div className="mt-6">
+              <h2 className="text-lg font-semibold mb-2">Items</h2>
+              <div className="space-y-2">
+                {items.map((it, i) => (
+                  <div key={i} className="flex justify-between border p-2 rounded">
+                    <span>{it.name}</span>
+                    <span className="font-bold">{it.boxes} Boxes | {it.strips} Strips</span>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                onClick={generatePDF}
+                className="bg-green-600 text-white px-4 py-2 rounded mt-4 w-full"
+              >
+                Generate PDF
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
