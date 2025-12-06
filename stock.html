@@ -122,21 +122,32 @@
       const [showSug, setShowSug] = React.useState(false);
       const [items, setItems] = React.useState([]);
 
-      function addItem() {
-        if (!name.trim()) return alert("Enter medicine name");
-        if (!boxes.trim()) return alert("Enter boxes");
 
-        setItems([...items, {
-          name,
-          boxes,
-          strips: strips || "-"
-        }]);
 
-        setName("");
-        setBoxes("");
-        setStrips("");
-        setShowSug(false);
-      }
+    function addItem() {
+  if (!name.trim()) return alert("Enter medicine name");
+  if (!boxes.trim()) return alert("Enter boxes");
+
+  // Check for duplicate
+  const isDuplicate = items.some(item => item.name.toLowerCase() === name.toLowerCase());
+  if (isDuplicate) {
+    return alert("This medicine is already added!");
+  }
+
+  // Add item
+  setItems([...items, {
+    name,
+    boxes,
+    strips: strips || "-"
+  }]);
+
+  setName("");
+  setBoxes("");
+  setStrips("");
+  setShowSug(false);
+}
+
+
 
      function generatePDF() {
   const { jsPDF } = window.jspdf;
