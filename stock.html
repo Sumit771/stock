@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Medicine Stock Manager</title>
 
   <!-- React + Babel -->
@@ -16,7 +16,7 @@
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-6">
+<body class="bg-gray-100 p-4 sm:p-6">
   <div id="root"></div>
 
   <script type="text/babel">
@@ -26,20 +26,22 @@
         "Halocare-1.5 DT","Halocare 5 DT","Depout-CH","Depout-10","Lored-2",
         "Etuit-60","Etuit -90","Etuit-T","Deploc-30","Setoxlin Plus",
         "Setoxlin CR 12.5","Setoxlin 12.5 Plus","Alzocept 10","Alzocept 5M",
-        "Steriocort 6","Olancare 2.5MD","Olancare 5MD","Olancare 20MD","Olancare 15MD",
-        "Olancare 5F","Rize-1","Jovail Plus","Jovail Lite","Jovail 15","Jovail 5",
-        "Jovail 10","Develpin ER 250","Develin ER 500","Oxozep DT 150","Oxozep DT 300",
-        "Oxozep 600","Fludil 5T","Ano Plus","SV Chrono 300","SV Chrono 500",
-        "Restnil LS","Restnil Plus","Flupen M","Clomicare 50","Clomicare 10","Clomicare 25",
-        "Clidore","Deples 7.5","Deples 15","Epilong 0.25MD","Epilong 0.5MD",
-        "Epilong 1MD","D-Ventodep XR-50","Clozcare 100","Clozcare 50","Clozcare 25",
-        "Levizep 250","Levizep 500","Brivazep 50","Neuracle K2-7","Tablodep DT-50",
-        "Tablodep 25","Tablodep DT-100","Depnocept-50","Depnocept-100","Thenopam Pro",
-        "Propol C 0.5","Aripaxe -10","Aripaxe-5","Aripaxe-15","Apropride-100",
-        "Apropride-50","Sertane 25","Sertane 50","Sertane 100","Dezotal-150",
+        "Steriocort 6","Olancare 2.5MD","Olancare 5MD","Olancare 20MD",
+        "Olancare 15MD","Olancare 5F","Rize-1","Jovail Plus","Jovail Lite",
+        "Jovail 15","Jovail 5","Jovail 10","Develpin ER 250","Develin ER 500",
+        "Oxozep DT 150","Oxozep DT 300","Oxozep 600","Fludil 5T","Ano Plus",
+        "SV Chrono 300","SV Chrono 500","Restnil LS","Restnil Plus","Flupen M",
+        "Clomicare 50","Clomicare 10","Clomicare 25","Clidore","Deples 7.5",
+        "Deples 15","Epilong 0.25MD","Epilong 0.5MD","Epilong 1MD",
+        "D-Ventodep XR-50","Clozcare 100","Clozcare 50","Clozcare 25",
+        "Levizep 250","Levizep 500","Brivazep 50","Neuracle K2-7",
+        "Tablodep DT-50","Tablodep 25","Tablodep DT-100","Depnocept-50",
+        "Depnocept-100","Thenopam Pro","Propol C 0.5","Aripaxe -10",
+        "Aripaxe-5","Aripaxe-15","Apropride-100","Apropride-50",
+        "Sertane 25","Sertane 50","Sertane 100","Dezotal-150",
         "Rabam-20","Rabam DSR","Ripcid LSR","Closum 5MD","Closum 10MD",
-        "Tigervit","Oxocetam-400","Olacute 5F","Olcute 7.5","Olacute 5","Olacute 2.5",
-        "Pacipan 1","Pacipan 0.5","Negride 50","Valcute CR-400","Olacute 10","Lored-1","Elith SR-400"
+        "Tigervit","Oxocetam-400","Olacute 5F","Olcute 7.5","Olacute 5",
+        "Olacute 2.5","Pacipan 1","Pacipan 0.5","Negride 50","Prolid 5"
       ];
 
       const [name, setName] = React.useState("");
@@ -47,9 +49,8 @@
       const [strips, setStrips] = React.useState("");
       const [showSug, setShowSug] = React.useState(false);
       const [items, setItems] = React.useState([]);
-      const [editIndex, setEditIndex] = React.useState(null);
 
-      // Load from localStorage on page load
+      // load saved items
       React.useEffect(() => {
         const saved = localStorage.getItem("medicines");
         if (saved) setItems(JSON.parse(saved));
@@ -62,24 +63,19 @@
 
       function addItem() {
         if (!name.trim()) return alert("Enter medicine name");
-        if (!boxes.trim()) return alert("Enter boxes");
-         if (Number(boxes) < 0) return alert("Boxes cannot be negative");
-  if (strips && Number(strips) < 0) return alert("Strips cannot be negative");
+        if (!boxes.toString().trim()) return alert("Enter boxes");
 
-        // If editing, update the item
-        if (editIndex !== null) {
-          const updatedItems = [...items];
-          updatedItems[editIndex] = { name, boxes, strips: strips || "-" };
-          setItems(updatedItems);
-          setEditIndex(null);
-        } else {
-          // Check for duplicates
-          const isDuplicate = items.some(item => item.name.toLowerCase() === name.toLowerCase());
-          if (isDuplicate) return alert("This medicine is already added!");
+        const normalized = name.trim();
+        const isDuplicate = items.some(i => i.name.toLowerCase() === normalized.toLowerCase());
+        if (isDuplicate) return alert("This medicine is already added!");
 
-          const newItem = { name, boxes, strips: strips || "-" };
-          setItems([...items, newItem]);
-        }
+        const newItem = {
+          name: normalized,
+          boxes: Number(boxes) || 0,
+          strips: strips === "" ? "-" : Number(strips)
+        };
+
+        setItems(prev => [...prev, newItem]);
 
         setName("");
         setBoxes("");
@@ -87,150 +83,264 @@
         setShowSug(false);
       }
 
-      function editItem(index) {
-        setName(items[index].name);
-        setBoxes(items[index].boxes);
-        setStrips(items[index].strips === "-" ? "" : items[index].strips);
-        setEditIndex(index);
-        setShowSug(false);
+      // compute out of stock (those suggestions not present in items) — used only for PDF
+      const inStockNames = new Set(items.map(i => i.name.toLowerCase()));
+      const outOfStock = suggestions
+        .filter(s => !inStockNames.has(s.toLowerCase()))
+        .map(s => ({ name: s, boxes: 0, strips: 0 }));
+
+      // PDF generation: sorted alphabetically, red for boxes < 4
+     function generatePDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "a4" });
+    const pageHeight = doc.internal.pageSize.height;
+    const left = 40;
+   const rowGap = 8;  // extra margin between rows
+
+
+
+
+    // Moved boxes & strips closer
+    const columnX = { 
+        sr: left, 
+        name: left + 40, 
+        boxes: left + 150,   // closer
+        strips: left + 200   // closer
+    };
+
+    let y = 80;   // Added more spacing before "In Stock"
+
+    // sort lists
+    const sortedInStock = [...items].sort((a, b) => a.name.localeCompare(b.name));
+    const sortedOut = [...outOfStock].sort((a, b) => a.name.localeCompare(b.name));
+
+    doc.setFontSize(18);
+    doc.text("AVAILABLE STOCK", left, 40);
+
+    doc.setFontSize(11);
+    const today = new Date().toLocaleDateString();
+    doc.text(`Date: ${today}`, left, 56);
+
+    function addHeader(title) {
+        doc.setFontSize(13);
+        doc.setTextColor(0,0,0);
+        doc.text(title, left, y);
+        y += 18;
+
+        doc.setFontSize(11);
+        doc.text("Sr", columnX.sr, y);
+        doc.text("Name", columnX.name, y);
+        doc.text("Boxes", columnX.boxes, y);
+        doc.text("Strips", columnX.strips, y);
+
+        y += 8;
+        doc.setLineWidth(0.5);
+        doc.line(left - 10, y, doc.internal.pageSize.width - left + 10, y);
+        y += 14;
+    }
+
+    // IN STOCK SECTION
+    addHeader("In Stock");
+
+    if (sortedInStock.length === 0) {
+        doc.text("— No items in stock —", columnX.name, y);
+        y += 18;
+    } else {
+        sortedInStock.forEach((it, idx) => {
+            if (y > pageHeight - 60) {
+                doc.addPage();
+                y = 40;
+            }
+
+            if (Number(it.boxes) < 4) doc.setTextColor(255,0,0);
+            else doc.setTextColor(0,0,0);
+
+            doc.text(String(idx + 1), columnX.sr, y);
+
+            const nameLines = doc.splitTextToSize(it.name, 220);
+            doc.text(nameLines, columnX.name, y);
+
+            const nameHeight = (nameLines.length - 1) * 12;
+
+            doc.text(String(it.boxes), columnX.boxes, y);
+            doc.text(String(it.strips), columnX.strips, y);
+
+          y += 14 + nameHeight + rowGap;
+        });
+    }
+
+    doc.setTextColor(0,0,0);
+    y += 10;
+
+    // OUT OF STOCK SECTION
+    addHeader("Out of Stock");
+
+    if (sortedOut.length === 0) {
+        doc.text("— No out of stock items —", columnX.name, y);
+        y += 18;
+    } else {
+        sortedOut.forEach((it, idx) => {
+            if (y > pageHeight - 60) {
+                doc.addPage();
+                y = 40;
+            }
+
+            doc.setTextColor(0,0,0);
+            doc.text(String(idx + 1), columnX.sr, y);
+
+            const nameLines = doc.splitTextToSize(it.name, 220);
+            doc.text(nameLines, columnX.name, y);
+
+            const nameHeight = (nameLines.length - 1) * 12;
+
+            doc.text(String(it.boxes), columnX.boxes, y);
+            doc.text(String(it.strips), columnX.strips, y);
+
+          y += 14 + nameHeight;
+        });
+    }
+
+    doc.save("available_stock.pdf");
+}
+
+
+      // optional remove item
+      function removeItem(idx) {
+        setItems(prev => prev.filter((_, i) => i !== idx));
       }
 
+      // clear all with confirm
       function clearAll() {
-        if (window.confirm("Are you sure you want to clear all medicines?")) {
+        if (confirm("Clear all saved items?")) {
           setItems([]);
           localStorage.removeItem("medicines");
         }
       }
 
-      function generatePDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-
-        doc.setFontSize(18);
-        doc.text("AVAILABLE STOCK", 10, 15);
-        const today = new Date().toLocaleDateString();
-        doc.setFontSize(11);
-        doc.text(`Date: ${today}`, 10, 22);
-
-        let y = 35;
-        doc.setFontSize(12);
-
-        // Table header
-        doc.text("Sr No", 10, y);
-        doc.text("Name", 30, y);
-        doc.text("Boxes", 75, y);
-        doc.text("Strips", 90, y);
-
-        y += 8;
-        doc.setLineWidth(0.2);
-        doc.line(10, y, 200, y);
-        y += 8;
-
-        items.forEach((it, index) => {
-          doc.text(String(index + 1), 10, y);
-          doc.text(it.name, 30, y);
-          doc.text(String(it.boxes), 75, y);
-          doc.text(String(it.strips), 90, y);
-
-          y += 8;
-          if (y > 270) {
-            doc.addPage();
-            y = 20;
-          }
-        });
-
-        doc.save("available_stock.pdf");
-      }
-
       return (
-        <div className="max-w-xl mx-auto bg-white p-6 rounded-xl shadow">
-          <h1 className="text-2xl font-bold mb-1">AVAILABLE STOCK</h1>
-          <p className="text-gray-600 mb-4">Date: {new Date().toLocaleDateString()}</p>
-
-          <label className="font-semibold">Medicine Name</label>
-          <input
-            className="w-full border p-2 rounded mb-1"
-            value={name}
-            onChange={(e) => { setName(e.target.value); setShowSug(true); }}
-            placeholder="Enter medicine name"
-          />
-
-          {showSug && name && (
-            <div className="border bg-white p-2 rounded max-h-40 overflow-auto mb-3">
-              {suggestions
-                .filter(s => s.toLowerCase().includes(name.toLowerCase()))
-                .map((s, i) => (
-                  <div
-                    key={i}
-                    className="p-1 cursor-pointer hover:bg-gray-200"
-                    onClick={() => { setName(s); setShowSug(false); }}
-                  >
-                    {s}
-                  </div>
-                ))}
-            </div>
-          )}
-
-          <label className="font-semibold">Boxes (Reqd)</label>
-          <input
-            type="number"
-            min="0"
-            className="w-full border p-2 rounded mb-3"
-            value={boxes}
-            onChange={(e) => setBoxes(e.target.value)}
-            placeholder="Enter boxes"
-          />
-<label className="font-semibold">Strips (Optional)</label>
-          <input
-            type="number"
-            min="0"
-            className="w-full border p-2 rounded mb-3"
-            value={strips}
-            onChange={(e) => setStrips(e.target.value)}
-            placeholder="Enter strips"
-          />
-
-          <button
-            onClick={addItem}
-            className="bg-blue-600 text-white px-4 py-2 rounded mb-2 w-full"
-          >
-            {editIndex !== null ? "Update" : "Add"}
-          </button>
-
-          {items.length > 0 && (
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-2">Items</h2>
-              <div className="space-y-2">
-                {items.map((it, i) => (
-                  <div key={i} className="flex justify-between items-center border p-2 rounded">
-                    <span>{i + 1}. {it.name} - {it.boxes} Boxes | {it.strips} Strips</span>
-                    <div className="space-x-2">
-                      <button
-                        onClick={() => editItem(i)}
-                        className="bg-yellow-500 text-white px-2 py-1 rounded"
-                      >
-                        Modify
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={generatePDF}
-                className="bg-green-600 text-white px-4 py-2 rounded mt-4 w-full"
-              >
-                Generate PDF
-              </button>
-
+        <div className="max-w-3xl mx-auto">
+          <div className="bg-white p-5 rounded-xl shadow relative">
+            {/* Top-right small Clear All button inside card */}
+            <div className="absolute top-3 right-3">
               <button
                 onClick={clearAll}
-                className="bg-red-600 text-white px-4 py-2 rounded mt-2 w-half"
+                className="text-sm bg-red-600 text-white px-3 py-1 rounded shadow-sm hover:opacity-90"
+                title="Clear All"
               >
                 Clear All
               </button>
             </div>
-          )}
+
+            {/* Header */}
+            <div className="mb-4">
+              <h1 className="text-2xl font-bold">AVAILABLE STOCK</h1>
+              <p className="text-gray-600 text-sm">Date: {new Date().toLocaleDateString()}</p>
+            </div>
+
+            {/* Inputs row with Add button on top */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+              <div className="md:col-span-6">
+                <label className="font-semibold text-sm">Medicine Name</label>
+                <input
+                  className="w-full border p-2 rounded mt-1"
+                  value={name}
+                  onChange={(e) => { setName(e.target.value); setShowSug(true); }}
+                  placeholder="Enter medicine name"
+                />
+                {showSug && name && (
+                  <div className="border bg-white p-2 rounded max-h-40 overflow-auto mt-1">
+                    {suggestions
+                      .filter(s => s.toLowerCase().includes(name.toLowerCase()))
+                      .map((s, i) => (
+                        <div
+                          key={i}
+                          className="p-1 cursor-pointer hover:bg-gray-100"
+                          onClick={() => { setName(s); setShowSug(false); }}
+                        >
+                          {s}
+                        </div>
+                      ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="font-semibold text-sm">Boxes (Required)</label>
+                <input
+                  type="number"
+                  className="w-full border p-2 rounded mt-1"
+                  value={boxes}
+                  onChange={(e) => setBoxes(e.target.value)}
+                  placeholder="Enter boxes"
+                  min="0"
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="font-semibold text-sm">Strips (Optional)</label>
+                <input
+                  type="number"
+                  className="w-full border p-2 rounded mt-1"
+                  value={strips}
+                  onChange={(e) => setStrips(e.target.value)}
+                  placeholder="Enter strips"
+                  min="0"
+                />
+              </div>
+
+              <div className="md:col-span-2 flex md:justify-end">
+                <button
+                  onClick={addItem}
+                  className="bg-blue-600 text-white px-4 py-2 rounded mt-1 w-full md:w-auto"
+                >
+                  Add
+                </button>
+              </div>
+            </div>
+
+            {/* Items list (In Stock) — immediately below inputs */}
+            <div className="mt-6">
+              <h2 className="text-lg font-semibold mb-2">Items (In Stock)</h2>
+              {items.length === 0 ? (
+                <p className="text-gray-500">No items added.</p>
+              ) : (
+                <div className="space-y-2">
+                  {items.map((it, i) => (
+                    <div key={i} className="flex items-center justify-between border p-2 rounded">
+                      <div>
+                        <div className="font-medium">{it.name}</div>
+                        <div className="text-sm text-gray-600">{it.boxes} Boxes | {it.strips} Strips</div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        {Number(it.boxes) < 4 && (
+                          <span className="text-red-600 font-semibold">Low ({it.boxes})</span>
+                        )}
+                        <button
+                          onClick={() => removeItem(i)}
+                          className="text-sm text-red-500 hover:underline"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Generate PDF button (below items) */}
+            <div className="mt-6">
+              <button
+                onClick={generatePDF}
+                className="bg-green-600 text-white px-4 py-3 rounded w-full md:w-auto md:px-6 md:py-2"
+              >
+                Generate PDF
+              </button>
+            </div>
+
+            {/* Note: Out of Stock is NOT shown on screen — generated in PDF only */}
+          </div>
         </div>
       );
     }
