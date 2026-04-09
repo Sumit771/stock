@@ -1,388 +1,493 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Medicine Stock Manager</title>
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Stock Manager</title>
   <!-- React + Babel -->
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/react@18.2.0/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
   <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .modal-backdrop { backdrop-filter: blur(2px); }
+  </style>
 </head>
-<body class="bg-gray-100 p-4 sm:p-6">
+<body class="bg-gradient-to-br from-slate-100 to-gray-200 p-4 sm:p-6 font-sans">
   <div id="root"></div>
 
   <script type="text/babel">
-    function App() {
-      const suggestions = [
-        "Alzocept 10","Alzocept 5","Alzocept 5M",
-"Ano Plus","Ano SP",
-"Apropride-100","Apropride-50",
-"Aripaxe-10","Aripaxe-15","Aripaxe-5",
-"Brevetam 75",
-"Brivazep 50",
-"Brizan 2.5",
-"Clidore",
-"Clomicare 10","Clomicare 25","Clomicare 50",
-"Clozcare 100","Clozcare 25","Clozcare 50",
-"Closum 10MD","Closum 5MD",
-"Cobalcon Forte",
-"Deples 15","Deples 7.5",
-"Deploc 20","Deploc-30",
-"Depnocept-100","Depnocept-50",
-"Depout-10","Depout-CH",
-"Develpin ER 250","Develpin ER 500",
-"Dezotal-150",
-"D-Ventodep XR-50",
-"Epilong 0.25MD","Epilong 0.5MD","Epilong 1MD","Epilong 2MD",
-"Epsinil-2",
-"Etuit-60","Etuit-90","Etuit-T",
-"Fludil 5T",
-"Fluoxecare-20 MD","Fluoxecare-40",
-"Flupen M",
-"Fulsleep-10","Fulsleep-5",
-"Halocare-1.5 DT","Halocare 5 DT",
-"Humbre Syrup",
-"Jovail 10","Jovail 15","Jovail 5","Jovail Lite","Jovail Plus",
-"Levizep 250","Levizep 500",
-"Lored 1","Lored-2",
-"Lozar 1","Lozar 2","Lozar 3",
-"Memadon Forte","Memadon Plus",
-"Negride 50",
-"Neuracle K2-7",
-"Nupur 10","Nupur 5",
-"Olacute 2.5","Olacute 5","Olacute 5F",
-"Olancare 15MD","Olancare 20MD","Olancare 2.5MD","Olancare 5F","Olancare 5MD",
-"Olcute 7.5",
-"Oxocetam-400",
-"Oxozep 600","Oxozep DT 150","Oxozep DT 300","Oxozep DT 600",
-"Pacipan 0.5","Pacipan 1",
-"Prolid 5",
-"Propol C 0.5",
-"Rabam DSR","Rabam-20",
-"Restnil LS","Restnil Plus",
-"Ripcid LSR",
-"Rize-1","Rize 2","Rize 2 Plus",
-"Sertane 100","Sertane 25","Sertane 50",
-"Setoxlin 12.5 Plus","Setoxlin 25 Plus","Setoxlin CR 12.5","Setoxlin CR 25","Setoxlin CR 37.5",
-"Steriocort 6",
-"SV Chrono 200","SV Chrono 300","SV Chrono 500",
-"Tablodep 25","Tablodep DT-100","Tablodep DT-50",
-"Thenopam Pro",
-"Tigervit",
-"Valcute CR 400",
-"VLP CR 200","VLP CR 300","VLP CR 400"
-      ];
+    // ---------- MEDICINE SUGGESTIONS (full list) ----------
+    const MEDICINE_SUGGESTIONS = [
+      "Alzocept 10","Alzocept 5","Alzocept 5M","Ano Plus","Ano SP","Apropride-100","Apropride-50",
+      "Aripaxe-10","Aripaxe-15","Aripaxe-5","Brevetam 75","Brivazep 50","Brizan 2.5","Clidore",
+      "Clomicare 10","Clomicare 25","Clomicare 50","Clozcare 100","Clozcare 25","Clozcare 50",
+      "Closum 10MD","Closum 5MD","Cobalcon Forte","Deples 15","Deples 7.5","Deploc 20","Deploc-30",
+      "Depnocept-100","Depnocept-50","Depout-10","Depout-CH","Develpin ER 250","Develpin ER 500",
+      "Dezotal-150","D-Ventodep XR-50","Epilong 0.25MD","Epilong 0.5MD","Epilong 1MD","Epilong 2MD",
+      "Epsinil-2","Etuit-60","Etuit-90","Etuit-T","Fludil 5T","Fluoxecare-20 MD","Fluoxecare-40",
+      "Flupen M","Fulsleep-10","Fulsleep-5","Halocare-1.5 DT","Halocare 5 DT","Humbre Syrup",
+      "Jovail 10","Jovail 15","Jovail 5","Jovail Lite","Jovail Plus","Levizep 250","Levizep 500",
+      "Lored 1","Lored-2","Lozar 1","Lozar 2","Lozar 3","Memadon Forte","Memadon Plus","Negride 50",
+      "Neuracle K2-7","Nupur 10","Nupur 5","Olacute 2.5","Olacute 5","Olacute 5F","Olancare 15MD",
+      "Olancare 20MD","Olancare 2.5MD","Olancare 5F","Olancare 5MD","Olcute 7.5","Oxocetam-400",
+      "Oxozep 600","Oxozep DT 150","Oxozep DT 300","Oxozep DT 600","Pacipan 0.5","Pacipan 1",
+      "Prolid 5","Propol C 0.5","Rabam DSR","Rabam-20","Restnil LS","Restnil Plus","Restnil 2","Ripcid LSR",
+      "Rize-1","Rize 2","Rize 2 Plus","Sertane 100","Sertane 25","Sertane 50","Setoxlin 12.5 Plus",
+      "Setoxlin 25 Plus","Setoxlin CR 12.5","Setoxlin CR 25","Setoxlin CR 37.5","Steriocort 6",
+      "SV Chrono 200","SV Chrono 300","SV Chrono 500","Tablodep 25","Tablodep DT-100","Tablodep DT-50",
+      "Thenopam Pro","Tigervit","Valcute CR 400","VLP CR 200","VLP CR 300","VLP CR 400"
+    ];
 
-      const [name, setName] = React.useState("");
-      const [boxes, setBoxes] = React.useState("");
-      const [strips, setStrips] = React.useState("");
-      const [showSug, setShowSug] = React.useState(false);
+    // ---------- MAIN APP ----------
+    const App = () => {
+      // State
       const [items, setItems] = React.useState([]);
-
-      // load saved items
+      const [hiddenOOS, setHiddenOOS] = React.useState(new Set());
+      const [customOOS, setCustomOOS] = React.useState([]);
+      const [companyName, setCompanyName] = React.useState("Auxilium Pharma");
+      
+      // Form state
+      const [nameInput, setNameInput] = React.useState("");
+      const [boxesInput, setBoxesInput] = React.useState("");
+      const [stripsInput, setStripsInput] = React.useState("");
+      const [showSuggestions, setShowSuggestions] = React.useState(false);
+      
+      // PDF settings
+      const [paperSize, setPaperSize] = React.useState("a4");
+      const [columnLayout, setColumnLayout] = React.useState("single");
+      
+      // UI helpers
+      const [searchTerm, setSearchTerm] = React.useState("");
+      const [editTarget, setEditTarget] = React.useState(null);
+      
+      // Persistence
       React.useEffect(() => {
-        const saved = localStorage.getItem("medicines");
-        if (saved) setItems(JSON.parse(saved));
+        try {
+          const saved = localStorage.getItem("medstock_items");
+          if (saved) setItems(JSON.parse(saved));
+          const savedHidden = localStorage.getItem("medstock_hiddenOOS");
+          if (savedHidden) setHiddenOOS(new Set(JSON.parse(savedHidden)));
+          const savedCustom = localStorage.getItem("medstock_customOOS");
+          if (savedCustom) setCustomOOS(JSON.parse(savedCustom));
+          const savedCompany = localStorage.getItem("medstock_company");
+          if (savedCompany) setCompanyName(savedCompany);
+        } catch(e) { console.warn(e); }
       }, []);
-
-      // Save to localStorage whenever items change
+      
       React.useEffect(() => {
-        localStorage.setItem("medicines", JSON.stringify(items));
-      }, [items]);
-
-      function addItem() {
-        if (!name.trim()) return alert("Enter medicine name");
-        if (!boxes.toString().trim()) return alert("Enter boxes");
-
-        const normalized = name.trim();
-        const isDuplicate = items.some(i => i.name.toLowerCase() === normalized.toLowerCase());
-        if (isDuplicate) return alert("This medicine is already added!");
-
-        const newItem = {
-          name: normalized,
-          boxes: Number(boxes) || 0,
-          strips: strips === "" ? "-" : Number(strips)
-        };
-
-        setItems(prev => [...prev, newItem]);
-
-        setName("");
-        setBoxes("");
-        setStrips("");
-        setShowSug(false);
-      }
-
-      // compute out of stock (those suggestions not present in items) — used only for PDF
-      const inStockNames = new Set(items.map(i => i.name.toLowerCase()));
-      const outOfStock = suggestions
-        .filter(s => !inStockNames.has(s.toLowerCase()))
-        .map(s => ({ name: s, boxes: 0, strips: 0 }));
-
-      // PDF generation: sorted alphabetically, red for boxes < 4
-     function generatePDF() {
-    const { jsPDF } = window.jspdf;
-    const doc = new jsPDF({ unit: "pt", format: "a4" });
-    const pageHeight = doc.internal.pageSize.height;
-    const left = 40;
-   const rowGap = 8;  // extra margin between rows
-
-
-
-
-    // Moved boxes & strips closer
-    const columnX = { 
-        sr: left, 
-        name: left + 40, 
-        boxes: left + 150,   // closer
-        strips: left + 200   // closer
-    };
-
-    let y = 80;   // Added more spacing before "In Stock"
-
-    // sort lists
-    const sortedInStock = [...items].sort((a, b) => a.name.localeCompare(b.name));
-    const sortedOut = [...outOfStock].sort((a, b) => a.name.localeCompare(b.name));
-
-    doc.setFontSize(18);
-    doc.text("AVAILABLE STOCK", left, 40);
-
-    doc.setFontSize(11);
-    const today = new Date().toLocaleDateString();
-    doc.text(`Date: ${today}`, left, 56);
-
-    function addHeader(title) {
-        doc.setFontSize(13);
-        doc.setTextColor(0,0,0);
-        doc.text(title, left, y);
-        y += 18;
-
-        doc.setFontSize(11);
-        doc.text("Sr", columnX.sr, y);
-        doc.text("Name", columnX.name, y);
-        doc.text("Boxes", columnX.boxes, y);
-        doc.text("Strips", columnX.strips, y);
-
-        y += 8;
-        doc.setLineWidth(0.5);
-        doc.line(left - 10, y, doc.internal.pageSize.width - left + 10, y);
-        y += 14;
-    }
-
-    // IN STOCK SECTION
-    addHeader("In Stock");
-
-    if (sortedInStock.length === 0) {
-        doc.text("— No items in stock —", columnX.name, y);
-        y += 18;
-    } else {
-        sortedInStock.forEach((it, idx) => {
-            if (y > pageHeight - 60) {
-                doc.addPage();
-                y = 40;
-            }
-
-            if (Number(it.boxes) < 4) doc.setTextColor(255,0,0);
-            else doc.setTextColor(0,0,0);
-
-            doc.text(String(idx + 1), columnX.sr, y);
-
-            const nameLines = doc.splitTextToSize(it.name, 220);
-            doc.text(nameLines, columnX.name, y);
-
-            const nameHeight = (nameLines.length - 1) * 12;
-
-            doc.text(String(it.boxes), columnX.boxes, y);
-            doc.text(String(it.strips), columnX.strips, y);
-
-          y += 14 + nameHeight + rowGap;
-        });
-    }
-
-    doc.setTextColor(0,0,0);
-    y += 10;
-
-    // OUT OF STOCK SECTION
-    addHeader("Out of Stock");
-
-    if (sortedOut.length === 0) {
-        doc.text("— No out of stock items —", columnX.name, y);
-        y += 18;
-    } else {
-        sortedOut.forEach((it, idx) => {
-            if (y > pageHeight - 60) {
-                doc.addPage();
-                y = 40;
-            }
-
-            doc.setTextColor(0,0,0);
-            doc.text(String(idx + 1), columnX.sr, y);
-
-            const nameLines = doc.splitTextToSize(it.name, 220);
-            doc.text(nameLines, columnX.name, y);
-
-            const nameHeight = (nameLines.length - 1) * 12;
-
-            doc.text(String(it.boxes), columnX.boxes, y);
-            doc.text(String(it.strips), columnX.strips, y);
-
-          y += 14 + nameHeight;
-        });
-    }
-
-    doc.save("available_stock.pdf");
-}
-
-
-      // optional remove item
-      function removeItem(idx) {
-        setItems(prev => prev.filter((_, i) => i !== idx));
-      }
-
-      // clear all with confirm
-      function clearAll() {
-        if (confirm("Clear all saved items?")) {
-          setItems([]);
-          localStorage.removeItem("medicines");
+        localStorage.setItem("medstock_items", JSON.stringify(items));
+        localStorage.setItem("medstock_hiddenOOS", JSON.stringify([...hiddenOOS]));
+        localStorage.setItem("medstock_customOOS", JSON.stringify(customOOS));
+        localStorage.setItem("medstock_company", companyName);
+      }, [items, hiddenOOS, customOOS, companyName]);
+      
+      // Computed out-of-stock list
+      const outOfStockList = React.useMemo(() => {
+        const inStockNames = new Set(items.map(i => i.name.trim().toLowerCase()));
+        const fromSuggestions = MEDICINE_SUGGESTIONS
+          .filter(s => !inStockNames.has(s.toLowerCase()) && !hiddenOOS.has(s))
+          .map(name => ({ name, boxes: 0, strips: 0 }));
+        const fromCustom = customOOS
+          .filter(c => !inStockNames.has(c.name.toLowerCase()))
+          .map(c => ({ name: c.name, boxes: 0, strips: 0 }));
+        return [...fromSuggestions, ...fromCustom].sort((a,b) => a.name.localeCompare(b.name));
+      }, [items, hiddenOOS, customOOS]);
+      
+      // Stock operations
+      const addToStock = () => {
+        const medName = nameInput.trim();
+        if (!medName) return alert("Enter medicine name");
+        const boxesVal = parseInt(boxesInput);
+        if (isNaN(boxesVal) || boxesVal < 0) return alert("Boxes must be ≥ 0");
+        const stripsVal = stripsInput === "" ? 0 : parseInt(stripsInput);
+        if (isNaN(stripsVal)) return alert("Strips must be a number");
+        if (items.some(i => i.name.toLowerCase() === medName.toLowerCase())) {
+          return alert("Medicine already in stock!");
         }
-      }
-
+        setItems(prev => [...prev, { name: medName, boxes: boxesVal, strips: stripsVal }]);
+        if (hiddenOOS.has(medName)) {
+          const newHidden = new Set(hiddenOOS);
+          newHidden.delete(medName);
+          setHiddenOOS(newHidden);
+        }
+        setCustomOOS(prev => prev.filter(c => c.name.toLowerCase() !== medName.toLowerCase()));
+        setNameInput("");
+        setBoxesInput("");
+        setStripsInput("");
+        setShowSuggestions(false);
+      };
+      
+      const removeFromStock = (idx) => {
+        if (confirm("Remove this item?")) setItems(prev => prev.filter((_, i) => i !== idx));
+      };
+      
+      const openEditModal = (item, idx) => setEditTarget({ index: idx, name: item.name, boxes: item.boxes, strips: item.strips });
+      const saveEdit = () => {
+        if (!editTarget) return;
+        const newBoxes = parseInt(editTarget.boxes);
+        const newStrips = parseInt(editTarget.strips);
+        if (isNaN(newBoxes) || newBoxes < 0) return alert("Invalid boxes");
+        if (isNaN(newStrips) || newStrips < 0) return alert("Invalid strips");
+        setItems(prev => prev.map((it, i) => i === editTarget.index ? { ...it, boxes: newBoxes, strips: newStrips } : it));
+        setEditTarget(null);
+      };
+      
+      // OOS modify operations
+      const moveOOSToStock = (oosItem) => {
+        const boxesPrompt = prompt(`Boxes for "${oosItem.name}":`, "1");
+        if (!boxesPrompt) return;
+        const boxesNum = parseInt(boxesPrompt);
+        if (isNaN(boxesNum) || boxesNum < 0) return alert("Invalid boxes");
+        const stripsPrompt = prompt(`Strips for "${oosItem.name}":`, "0");
+        const stripsNum = parseInt(stripsPrompt) || 0;
+        if (items.some(i => i.name.toLowerCase() === oosItem.name.toLowerCase())) {
+          return alert("Already in stock!");
+        }
+        setItems(prev => [...prev, { name: oosItem.name, boxes: boxesNum, strips: stripsNum }]);
+        if (MEDICINE_SUGGESTIONS.includes(oosItem.name)) {
+          setHiddenOOS(prev => new Set(prev).add(oosItem.name));
+        } else {
+          setCustomOOS(prev => prev.filter(c => c.name !== oosItem.name));
+        }
+      };
+      
+      const hideOOSItem = (oosItem) => {
+        if (MEDICINE_SUGGESTIONS.includes(oosItem.name)) {
+          setHiddenOOS(prev => new Set(prev).add(oosItem.name));
+        } else {
+          setCustomOOS(prev => prev.filter(c => c.name !== oosItem.name));
+        }
+      };
+      
+      const addCustomOOS = () => {
+        const newName = prompt("Enter medicine name to add to Out-of-Stock:");
+        if (!newName || !newName.trim()) return;
+        const trimmed = newName.trim();
+        if (items.some(i => i.name.toLowerCase() === trimmed.toLowerCase())) {
+          return alert("Already in stock!");
+        }
+        if (outOfStockList.some(o => o.name.toLowerCase() === trimmed.toLowerCase())) {
+          return alert("Already in OOS list!");
+        }
+        setCustomOOS(prev => [...prev, { name: trimmed }]);
+      };
+      
+      const resetOOS = () => {
+        if (confirm("Reset all hidden OOS items?")) setHiddenOOS(new Set());
+      };
+      
+      const clearAllStock = () => {
+        if (confirm("Clear ALL stock?")) setItems([]);
+      };
+      
+      // ---------- PDF GENERATION (boxes & strips moved closer to medicine name) ----------
+      const generatePDF = () => {
+        if (!window.jspdf) {
+          alert("jsPDF not loaded. Refresh.");
+          return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "pt", format: paperSize });
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+        const margin = { left: 45, right: 45, top: 65, bottom: 55 };
+        const contentWidth = pageWidth - margin.left - margin.right;
+        
+        let y = margin.top;
+        const today = new Date().toLocaleDateString('en-GB');
+        
+        const drawHeader = () => {
+          doc.setFontSize(26);
+          doc.setTextColor(40, 40, 80);
+          doc.text(companyName || "PHARMACEUTICAL COMPANY", margin.left, y);
+          y += 20;
+          doc.setFontSize(12);
+          doc.text("MEDICINE STOCK REPORT", margin.left, y);
+          y += 22;
+          doc.setFontSize(9);
+          doc.setTextColor(100, 100, 120);
+          doc.text(`Date: ${today}  |  Paper: ${paperSize.toUpperCase()}  |  Columns: ${columnLayout === 'single' ? '1 Column' : '2 Columns'}`, margin.left, y);
+          y += 16;
+          doc.setDrawColor(180, 180, 200);
+          doc.line(margin.left, y - 4, pageWidth - margin.right, y - 4);
+        };
+        
+        const sortedStock = [...items].sort((a,b) => a.name.localeCompare(b.name));
+        const sortedOOS = [...outOfStockList].sort((a,b) => a.name.localeCompare(b.name));
+        
+        const wrap = (text, maxWidth) => doc.splitTextToSize(text, maxWidth);
+        
+        // ----- 1 COLUMN RENDERER (boxes & strips placed right after medicine name) -----
+        const render1Col = (title, data, isStock, startY) => {
+          let yPos = startY;
+          if (yPos + 60 > pageHeight) { doc.addPage(); yPos = margin.top; drawHeader(); }
+          doc.setFontSize(12); doc.setTextColor(0,0,0); doc.text(title, margin.left, yPos); yPos += 20;
+          doc.setFontSize(9); doc.setTextColor(70,70,90);
+          // Positions: Sr (left), Name (left+40), Boxes (left+230), Strips (left+280) — much closer
+          const srX = margin.left;
+          const nameX = margin.left + 40;
+          const boxesX = margin.left + 230;
+          const stripsX = margin.left + 280;
+          doc.text("Sr.", srX, yPos);
+          doc.text("Medicine Name", nameX, yPos);
+          doc.text("Boxes", boxesX, yPos);
+          doc.text("Strips", stripsX, yPos);
+          yPos += 8;
+          doc.line(margin.left, yPos, pageWidth - margin.right, yPos);
+          yPos += 10;
+          if (data.length === 0) { doc.text("— No items —", margin.left + 45, yPos); yPos += 20; return yPos; }
+          for (let i = 0; i < data.length; i++) {
+            const item = data[i];
+            const boxVal = isStock ? item.boxes : 0;
+            const stripVal = isStock ? (item.strips || 0) : 0;
+            const isLow = isStock && boxVal < 4;
+            // Allow up to 170pt for medicine name before boxes column
+            const lines = wrap(item.name, 170);
+            const lineH = 12 + (lines.length - 1) * 10;
+            if (yPos + lineH + 20 > pageHeight) {
+              doc.addPage(); yPos = margin.top; drawHeader();
+              doc.setFontSize(9); doc.text("Sr.", srX, yPos); doc.text("Medicine Name", nameX, yPos);
+              doc.text("Boxes", boxesX, yPos); doc.text("Strips", stripsX, yPos);
+              yPos += 8; doc.line(margin.left, yPos, pageWidth - margin.right, yPos); yPos += 10;
+            }
+            if (isLow) doc.setTextColor(210,40,40); else doc.setTextColor(0,0,0);
+            doc.text(String(i+1), srX, yPos);
+            doc.text(lines, nameX, yPos);
+            doc.text(String(boxVal), boxesX, yPos);
+            doc.text(String(stripVal), stripsX, yPos);
+            yPos += lineH;
+          }
+          return yPos + 10;
+        };
+        
+        // ----- 2 COLUMN RENDERER (boxes & strips placed closer) -----
+        const render2Col = (title, data, isStock, startY) => {
+          let yPos = startY;
+          if (yPos + 60 > pageHeight) { doc.addPage(); yPos = margin.top; drawHeader(); }
+          doc.setFontSize(12); doc.setTextColor(0,0,0); doc.text(title, margin.left, yPos); yPos += 20;
+          if (data.length === 0) { doc.setFontSize(9); doc.text("— No items —", margin.left + 45, yPos); yPos += 20; return yPos; }
+          const colGap = 35;
+          const colWidth = (contentWidth - colGap) / 2;
+          const leftX = margin.left;
+          const rightX = margin.left + colWidth + colGap;
+          // Within each column: Sr (leftX), Medicine (leftX+30), Box (leftX+140), Strip (leftX+180)
+          const nameWidth = colWidth - 130; // enough space for name before boxes
+          const mid = Math.ceil(data.length / 2);
+          const leftData = data.slice(0, mid);
+          const rightData = data.slice(mid);
+          doc.setFontSize(9); doc.setTextColor(70,70,90);
+          // left column headers
+          doc.text("Sr.", leftX, yPos);
+          doc.text("Medicine", leftX + 30, yPos);
+          doc.text("Box", leftX + 140, yPos);
+          doc.text("Strip", leftX + 180, yPos);
+          // right column headers
+          doc.text("Sr.", rightX, yPos);
+          doc.text("Medicine", rightX + 30, yPos);
+          doc.text("Box", rightX + 140, yPos);
+          doc.text("Strip", rightX + 180, yPos);
+          yPos += 8;
+          doc.line(leftX, yPos, leftX + colWidth, yPos);
+          doc.line(rightX, yPos, rightX + colWidth, yPos);
+          yPos += 10;
+          let currentY = yPos;
+          const maxRows = Math.max(leftData.length, rightData.length);
+          for (let r = 0; r < maxRows; r++) {
+            let rowH = 12;
+            if (r < leftData.length) {
+              const leftLines = wrap(leftData[r].name, nameWidth);
+              rowH = Math.max(rowH, 12 + (leftLines.length - 1) * 10);
+            }
+            if (r < rightData.length) {
+              const rightLines = wrap(rightData[r].name, nameWidth);
+              rowH = Math.max(rowH, 12 + (rightLines.length - 1) * 10);
+            }
+            if (currentY + rowH + 15 > pageHeight) {
+              doc.addPage(); currentY = margin.top; drawHeader();
+              doc.setFontSize(9); doc.text("Sr.", leftX, currentY); doc.text("Medicine", leftX+30, currentY);
+              doc.text("Box", leftX+140, currentY); doc.text("Strip", leftX+180, currentY);
+              doc.text("Sr.", rightX, currentY); doc.text("Medicine", rightX+30, currentY);
+              doc.text("Box", rightX+140, currentY); doc.text("Strip", rightX+180, currentY);
+              currentY += 8; doc.line(leftX, currentY, leftX+colWidth, currentY);
+              doc.line(rightX, currentY, rightX+colWidth, currentY); currentY += 10;
+            }
+            if (r < leftData.length) {
+              const item = leftData[r];
+              const boxVal = isStock ? item.boxes : 0;
+              const stripVal = isStock ? (item.strips || 0) : 0;
+              const isLow = isStock && boxVal < 4;
+              if (isLow) doc.setTextColor(210,40,40); else doc.setTextColor(0,0,0);
+              doc.text(String(r+1), leftX, currentY);
+              const lines = wrap(item.name, nameWidth);
+              doc.text(lines, leftX+30, currentY);
+              doc.text(String(boxVal), leftX+140, currentY);
+              doc.text(String(stripVal), leftX+180, currentY);
+            }
+            if (r < rightData.length) {
+              const item = rightData[r];
+              const boxVal = isStock ? item.boxes : 0;
+              const stripVal = isStock ? (item.strips || 0) : 0;
+              const isLow = isStock && boxVal < 4;
+              if (isLow) doc.setTextColor(210,40,40); else doc.setTextColor(0,0,0);
+              const serial = leftData.length + r + 1;
+              doc.text(String(serial), rightX, currentY);
+              const lines = wrap(item.name, nameWidth);
+              doc.text(lines, rightX+30, currentY);
+              doc.text(String(boxVal), rightX+140, currentY);
+              doc.text(String(stripVal), rightX+180, currentY);
+            }
+            currentY += rowH;
+          }
+          return currentY + 15;
+        };
+        
+        drawHeader();
+        if (columnLayout === 'single') {
+          y = render1Col(" IN STOCK ITEMS", sortedStock, true, y);
+          y += 15;
+          if (y > pageHeight - 70) { doc.addPage(); y = margin.top; drawHeader(); }
+          y = render1Col(" OUT OF STOCK (Preview)", sortedOOS, false, y);
+        } else {
+          y = render2Col(" IN STOCK ITEMS", sortedStock, true, y);
+          y += 15;
+          if (y > pageHeight - 70) { doc.addPage(); y = margin.top; drawHeader(); }
+          y = render2Col(" OUT OF STOCK (Preview)", sortedOOS, false, y);
+        }
+        
+        // Footer
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i);
+          doc.setFontSize(8);
+          doc.setTextColor(150,150,150);
+          doc.text(`Generated: ${today} | ${companyName}`, margin.left, pageHeight - 20);
+        }
+        doc.save(`Stock_${companyName.replace(/\s/g, '_')}_${today}.pdf`);
+      };
+      
+      const exportCSV = () => {
+        let rows = [["Name", "Boxes", "Strips", "Status"]];
+        items.forEach(i => rows.push([i.name, i.boxes, i.strips, "In Stock"]));
+        outOfStockList.forEach(o => rows.push([o.name, "0", "0", "Out of Stock"]));
+        const csv = rows.map(r => r.map(c => `"${c}"`).join(",")).join("\n");
+        const blob = new Blob([csv], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url; a.download = "inventory.csv"; a.click();
+        URL.revokeObjectURL(url);
+      };
+      
+      const filteredStock = items.filter(i => i.name.toLowerCase().includes(searchTerm.toLowerCase()));
+      const lowCount = items.filter(i => i.boxes < 4).length;
+      
+      // Edit Modal component
+      const EditModal = () => {
+        if (!editTarget) return null;
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 modal-backdrop">
+            <div className="bg-white rounded-xl p-6 w-96 shadow-2xl">
+              <h3 className="text-xl font-bold mb-3">✏️ Edit Stock</h3>
+              <p className="font-medium mb-2">{editTarget.name}</p>
+              <div className="mb-3">
+                <label className="block text-sm font-medium">Boxes</label>
+                <input type="number" className="border p-2 rounded w-full" value={editTarget.boxes} onChange={e => setEditTarget({...editTarget, boxes: e.target.value})} />
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium">Strips</label>
+                <input type="number" className="border p-2 rounded w-full" value={editTarget.strips} onChange={e => setEditTarget({...editTarget, strips: e.target.value})} />
+              </div>
+              <div className="flex gap-3 justify-end">
+                <button onClick={() => setEditTarget(null)} className="px-4 py-2 bg-gray-300 rounded">Cancel</button>
+                <button onClick={saveEdit} className="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+              </div>
+            </div>
+          </div>
+        );
+      };
+      
       return (
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-white p-5 rounded-xl shadow relative">
-            {/* Top-right small Clear All button inside card */}
-            <div className="absolute top-3 right-3">
-              <button
-                onClick={clearAll}
-                className="text-sm bg-red-600 text-white px-3 py-1 rounded shadow-sm hover:opacity-90"
-                title="Clear All"
-              >
-                Clear All
-              </button>
+        <div className="max-w-6xl mx-auto">
+          <EditModal />
+          <div className="bg-white rounded-2xl shadow-xl p-5 md:p-7">
+            <div className="flex flex-wrap justify-between items-start gap-3 mb-5">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-gray-800">💊 MediStock</h1>
+                <div className="mt-2 flex items-center gap-2">
+                  <span className="text-sm font-semibold text-gray-600">Company:</span>
+                  <input type="text" value={companyName} onChange={e => setCompanyName(e.target.value)} className="border border-gray-300 rounded px-2 py-1 text-sm w-48 focus:ring-1 focus:ring-blue-400" />
+                </div>
+              </div>
+              <button onClick={clearAllStock} className="bg-rose-600 text-white px-3 py-1.5 rounded-lg shadow hover:bg-rose-700 text-sm">🗑 Clear Stock</button>
             </div>
-
-            {/* Header */}
-            <div className="mb-4">
-              <h1 className="text-2xl font-bold">AVAILABLE STOCK</h1>
-              <p className="text-gray-600 text-sm">Date: {new Date().toLocaleDateString()}</p>
-            </div>
-
-            {/* Inputs row with Add button on top */}
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
-              <div className="md:col-span-6">
+            
+            {/* Add Form */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end mb-6">
+              <div className="md:col-span-5 relative">
                 <label className="font-semibold text-sm">Medicine Name</label>
-                <input
-                  className="w-full border p-2 rounded mt-1"
-                  value={name}
-                  onChange={(e) => { setName(e.target.value); setShowSug(true); }}
-                  placeholder="Enter medicine name"
-                />
-                {showSug && name && (
-                  <div className="border bg-white p-2 rounded max-h-40 overflow-auto mt-1">
-                    {suggestions
-                      .filter(s => s.toLowerCase().includes(name.toLowerCase()))
-                      .map((s, i) => (
-                        <div
-                          key={i}
-                          className="p-1 cursor-pointer hover:bg-gray-100"
-                          onClick={() => { setName(s); setShowSug(false); }}
-                        >
-                          {s}
-                        </div>
-                      ))}
+                <input className="w-full border p-2 rounded mt-1" value={nameInput} onChange={(e) => { setNameInput(e.target.value); setShowSuggestions(true); }} placeholder="Type or select" />
+                {showSuggestions && nameInput && (
+                  <div className="absolute z-20 bg-white border rounded shadow-lg max-h-48 overflow-auto w-full">
+                    {MEDICINE_SUGGESTIONS.filter(s => s.toLowerCase().includes(nameInput.toLowerCase())).slice(0,12).map((s,i) => (
+                      <div key={i} className="p-2 hover:bg-blue-50 cursor-pointer" onClick={() => { setNameInput(s); setShowSuggestions(false); }}>{s}</div>
+                    ))}
                   </div>
                 )}
               </div>
-
-              <div className="md:col-span-2">
-                <label className="font-semibold text-sm">Boxes (Required)</label>
-                <input
-                  type="number"
-                  className="w-full border p-2 rounded mt-1"
-                  value={boxes}
-                  onChange={(e) => setBoxes(e.target.value)}
-                  placeholder="Enter boxes"
-                  min="0"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="font-semibold text-sm">Strips (Optional)</label>
-                <input
-                  type="number"
-                  className="w-full border p-2 rounded mt-1"
-                  value={strips}
-                  onChange={(e) => setStrips(e.target.value)}
-                  placeholder="Enter strips"
-                  min="0"
-                />
-              </div>
-
-              <div className="md:col-span-2 flex md:justify-end">
-                <button
-                  onClick={addItem}
-                  className="bg-blue-600 text-white px-4 py-2 rounded mt-1 w-full md:w-auto"
-                >
-                  Add
-                </button>
-              </div>
+              <div className="md:col-span-2"><label className="font-semibold text-sm">Boxes</label><input type="number" className="w-full border p-2 rounded mt-1" value={boxesInput} onChange={e => setBoxesInput(e.target.value)} min="0" /></div>
+              <div className="md:col-span-2"><label className="font-semibold text-sm">Strips</label><input type="number" className="w-full border p-2 rounded mt-1" value={stripsInput} onChange={e => setStripsInput(e.target.value)} min="0" /></div>
+              <div className="md:col-span-3"><button onClick={addToStock} className="bg-indigo-600 text-white px-5 py-2 rounded w-full">➕ Add to Stock</button></div>
             </div>
-
-            {/* Items list (In Stock) — immediately below inputs */}
-            <div className="mt-6">
-              <h2 className="text-lg font-semibold mb-2">Items (In Stock)</h2>
-              {items.length === 0 ? (
-                <p className="text-gray-500">No items added.</p>
-              ) : (
-                <div className="space-y-2">
-                  {items.map((it, i) => (
-                    <div key={i} className="flex items-center justify-between border p-2 rounded">
-                      <div>
-                        <div className="font-medium">{it.name}</div>
-                        <div className="text-sm text-gray-600">{it.boxes} Boxes | {it.strips} Strips</div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        {Number(it.boxes) < 4 && (
-                          <span className="text-red-600 font-semibold">Low ({it.boxes})</span>
-                        )}
-                        <button
-                          onClick={() => removeItem(i)}
-                          className="text-sm text-red-500 hover:underline"
-                        >
-                          Remove
-                        </button>
-                      </div>
+            
+            {/* PDF Controls */}
+            <div className="bg-gray-50 p-4 rounded-xl mb-6 flex flex-wrap gap-5 items-end justify-between">
+              <div><label className="font-bold text-sm">📄 Paper</label><select className="ml-2 border rounded p-1.5" value={paperSize} onChange={e => setPaperSize(e.target.value)}><option value="a4">A4</option><option value="letter">Letter</option></select></div>
+              <div><label className="font-bold text-sm">📐 Columns</label><select className="ml-2 border rounded p-1.5" value={columnLayout} onChange={e => setColumnLayout(e.target.value)}><option value="single">1 Column</option><option value="double">2 Columns</option></select></div>
+              <div className="flex gap-3"><button onClick={generatePDF} className="bg-emerald-700 text-white px-5 py-1.5 rounded-lg shadow">📑 Generate PDF</button><button onClick={exportCSV} className="bg-amber-600 text-white px-4 py-1.5 rounded-lg">📎 Export CSV</button></div>
+            </div>
+            
+            {/* In Stock List */}
+            <div className="mb-8">
+              <div className="flex justify-between items-center flex-wrap mb-2">
+                <h2 className="text-xl font-bold">📦 In Stock ({items.length}) <span className="text-sm text-red-500">Low: {lowCount}</span></h2>
+                <input type="text" placeholder="🔍 Search" className="border rounded p-1.5 text-sm w-48" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+              </div>
+              {filteredStock.length === 0 ? <p className="text-gray-400">No items.</p> : filteredStock.map((it, idx) => (
+                <div key={idx} className="flex justify-between items-center border-b py-2.5 px-1 hover:bg-gray-50">
+                  <div><span className="font-medium">{it.name}</span><div className="text-sm text-gray-500">{it.boxes} boxes | {it.strips} strips {it.boxes < 4 && <span className="text-red-500 ml-2">⚠️ Low</span>}</div></div>
+                  <div className="flex gap-2"><button onClick={() => openEditModal(it, items.indexOf(it))} className="text-blue-600 text-sm">✏️ Edit</button><button onClick={() => removeFromStock(items.indexOf(it))} className="text-red-500 text-sm">Remove</button></div>
+                </div>
+              ))}
+            </div>
+            
+            {/* Out of Stock Preview */}
+            <div className="border-t pt-5">
+              <div className="flex justify-between items-center flex-wrap">
+                <h2 className="text-xl font-bold text-amber-800">⚠️ Out of Stock ({outOfStockList.length})</h2>
+                <div className="flex gap-2"><button onClick={addCustomOOS} className="bg-purple-100 text-purple-800 px-3 py-1 rounded text-sm">➕ Add Custom OOS</button><button onClick={resetOOS} className="text-xs bg-gray-200 px-2 py-1 rounded">Reset hidden</button></div>
+              </div>
+              {outOfStockList.length === 0 ? <p className="text-gray-400 mt-2">All medicines in stock!</p> : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 max-h-80 overflow-auto">
+                  {outOfStockList.map((oos, idx) => (
+                    <div key={idx} className="flex justify-between items-center bg-gray-50 p-2 rounded border">
+                      <span className="font-mono text-sm">{oos.name}</span>
+                      <div className="flex gap-2"><button onClick={() => moveOOSToStock(oos)} className="bg-green-100 text-green-700 text-xs px-2 py-1 rounded"> Add Stock</button><button onClick={() => hideOOSItem(oos)} className="text-gray-500 text-xs px-2">Remove</button></div>
                     </div>
                   ))}
                 </div>
               )}
+              <div className="mt-3 text-xs text-gray-400 text-center">✔ Modify OOS: add custom, hide, or move to stock with custom quantity.</div>
             </div>
-
-            {/* Generate PDF button (below items) */}
-            <div className="mt-6">
-              <button
-                onClick={generatePDF}
-                className="bg-green-600 text-white px-4 py-3 rounded w-full md:w-auto md:px-6 md:py-2"
-              >
-                Generate PDF
-              </button>
-            </div>
-
-            {/* Note: Out of Stock is NOT shown on screen — generated in PDF only */}
           </div>
         </div>
       );
-    }
-
-    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    };
+    
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
   </script>
 </body>
 </html>
